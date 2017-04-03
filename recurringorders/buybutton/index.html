@@ -13,6 +13,7 @@
   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
   crossorigin="anonymous"></script>
 	<script src="assets/js/app.js"></script>
+	<script src="assets/js/money_format_helper.js"></script>
 </head>
 <body>
 
@@ -75,9 +76,11 @@
 							<div class="product-card no-border-bottom">
 								<img src="http://citsacademy.com/img/std01.jpg" id="product-image-display" height="50">
 								<div class="product-info-container">
-									<div class="one-half text-left product-card-container">
+									<div class="one-half text-left product-card-container front">
 										<label class="field-label pointer" id="product-title-display"></label><br/>
-										<label class="field-label pointer" id="variant-title-display"></label>
+										<label class="field-label pointer" id="variant-title-display"></label><br/>
+										<label class="field-label pointer" id="variant-price-display"></label><br/>
+										<label class="field-label pointer" id="variant-discounted-price-display"></label>
 									</div>
 								</div>
 							</div>

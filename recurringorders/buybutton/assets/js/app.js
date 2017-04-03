@@ -61,9 +61,18 @@ function useProduct(product_el){
 	});
 }
 
+function exists(element){
+	return typeof element !== 'undefined';
+}
+
 function backToStep2(){
 	document.getElementById('select-variant').style.display = 'block';
 	document.getElementById('finalize').style.display = 'block';
+
+	var discounted_price_el = document.getElementById('variant-discounted-price-display');
+	if(exists(discounted_price_el)){
+		discounted_price_el.innerHTML = '';
+	}
 	overlayHide('subscription-details', function(){
 		overlayHide('terms', function(){
 			overlayHide('get-codes', function(){
@@ -85,20 +94,52 @@ function finalize(){
 
 }
 
+function updateGlobals(){
+
+	var rp_div = document.querySelector('.product_rp_div.p' + active_product_id);
+	var discount_percentage_el = rp_div.querySelector('.discount_percentage');
+	var discounted_price_el = document.getElementById('discounted_price_val');
+
+	active_discount_percentage = parseInt(exists(discount_percentage_el)?discount_percentage_el.innerHTML.replace('%',''):'0');
+	active_discounted_price = discounted_price_el.innerHTML;
+	active_unformatted_discounted_price = (active_variant_price * 100) * ((100-active_discount_percentage)/100) / 100;
+
+}
+
 function fetchSubscriptionDetails(){
 
 	document.getElementById('progress-2').style.display = 'none';
 	document.getElementById('complete-2').style.display = 'inline-block';
 	document.getElementById('select-variant').style.display = 'none';
 
+    $('script').each(function() {
+        if (this.src === 'https://ro.boldapps.net/assets_embed/js/bold.js') {
+          this.parentNode.removeChild( this );
+        }
+        else if(this.src === 'https://ro.boldapps.net/app_assets/js/bootstrap_tooltip.js'){
+        	this.parentNode.removeChild( this );
+        }
+    });
+
 	overlayShow('subscription-details');
+
+	var frequency_num_display_el = document.getElementById('frequency_num');
+	var frequency_type_display_el = document.getElementById('frequency_type');
+	frequency_num_display_el.innerHTML = '';
+	frequency_type_display_el.innerHTML = '';
+
 	loadWidget(function(){
 		
 		var rp_div = document.querySelector('.product_rp_div.p' + active_product_id);
 		var frequency_num_el = rp_div.querySelector('.frequency_num');
 		var frequency_type_el = rp_div.querySelector('.frequency_type');
-		var frequency_num_display_el = document.getElementById('frequency_num');
-		var frequency_type_display_el = document.getElementById('frequency_type');
+
+		if(exists(rp_div.querySelector('.new_discounted_price'))){
+			document.getElementById('variant-discounted-price-display').innerHTML = 'Discounted Price: <span id="discounted_price_val">' + rp_div.querySelector('.new_discounted_price').innerHTML + '</span>';
+		}
+		else{
+			document.getElementById('variant-discounted-price-display').innerHTML = 'Discounted Price: <span id="discounted_price_val">' + Shopify.formatMoney(active_variant_price, productData[active_product_id].money_format) + '</span>';
+		}
 
 		if(frequency_num_el.tagName.toLowerCase() == 'input'){
 			frequency_num_display_el.innerHTML = '<option value="' + frequency_num_el.value + '">' + frequency_num_el.value + '</option>';
@@ -114,7 +155,11 @@ function fetchSubscriptionDetails(){
 		}
 
 		if(frequency_type_el.tagName.toLowerCase() == 'input'){
-			var freq_lang = ['Day(s)', 'Week(s)', 'Month(s)', 'Year(s)'];
+			var freq_lang = [];
+			freq_lang[1] = 'Day(s)';
+			freq_lang[2] = 'Week(s)';
+			freq_lang[3] = 'Month(s)';
+			freq_lang[5] = 'Year(s)';
 			frequency_type_display_el.innerHTML = '<option value="' + parseInt(frequency_type_el.value) + '">' + freq_lang[parseInt(frequency_type_el.value)] + '</option>';
 		}else{
 			var options = [].slice.call(frequency_type_el.children);
@@ -126,6 +171,8 @@ function fetchSubscriptionDetails(){
 				frequency_type_display_el.appendChild(o);
 			});
 		}
+
+		updateGlobals();
 
 	});
 
@@ -148,10 +195,12 @@ function displayProductVariants(product_id){
 	active_variant_title = productData[product_id].variants[keys[0]].title;
 	active_variant_id = keys[0];
 	active_group_id = productData[product_id].variants[keys[0]].group_id;
+	active_variant_price = productData[product_id].variants[keys[0]].price;
 
 	document.getElementById('product-image-display').src = active_featured_image;
 	document.getElementById('product-title-display').innerHTML = active_product_title;
 	document.getElementById('variant-title-display').innerHTML = active_variant_title;
+	document.getElementById('variant-price-display').innerHTML = 'Regular Price: ' + Shopify.formatMoney(active_variant_price, productData[active_product_id].money_format);
 
 }
 
@@ -172,7 +221,7 @@ function displayNextPage(){
 function getCode(){
 	var frequency_num = document.getElementById('frequency_num').value;
 	var frequency_type = document.getElementById('frequency_type').value;
-	var code = "https://" + myshopify_domain + "/pages/quick-subscribe?p=" + active_product_id + "&v=" + active_variant_id + "&g=" + active_group_id + "&fn=" + frequency_num + "&ft=" + frequency_type;
+	var code = "https://" + myshopify_domain + "/pages/quick-subscribe?p=" + active_product_id + "&v=" + active_variant_id + "&g=" + active_group_id + "&fn=" + frequency_num + "&ft=" + frequency_type + "&dp=" + active_discounted_price + "&rdp=" + active_discount_percentage + "&rup=" + active_unformatted_discounted_price;
 	alert('Your subscribe link is: ' + code);
 }
 

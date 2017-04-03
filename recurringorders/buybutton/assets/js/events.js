@@ -37,7 +37,9 @@ document.querySelector('#variant-id').addEventListener('change', function(){
 
 	active_variant_id = this.value;
 	active_variant_title = this.options[this.selectedIndex].innerHTML;
+	active_variant_price = productData[active_product_id].variants[active_variant_id].price;
 	document.getElementById('variant-title-display').innerHTML = active_variant_title;
+	document.getElementById('variant-price-display').innerHTML = 'Regular Price: ' + Shopify.formatMoney(active_variant_price, productData[active_product_id].money_format);
 	backToStep2();
 
 });
