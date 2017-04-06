@@ -309,6 +309,12 @@ function displayNextPage(){
 }
 
 function getCode(){
+
+	if(!document.getElementById('terms_input').checked){
+		alert("Please accept the terms and conditions before continueing.");
+		return;
+	}
+
 	var frequency_num = document.getElementById('frequency_num').value;
 	var frequency_type = document.getElementById('frequency_type').value;
 
